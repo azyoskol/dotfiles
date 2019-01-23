@@ -637,6 +637,21 @@ call plug#begin('~/.config/nvim/plugged')
         "     Plug 'roxma/vim-hug-neovim-rpc'
         " endif
         " let g:deoplete#enable_at_startup = 1
+        Plug 'ncm2/ncm2'
+        Plug 'roxma/nvim-yarp'
+
+        " Completion plugins
+        Plug 'ncm2/ncm2-bufword'
+        Plug 'ncm2/ncm2-tmux'
+        Plug 'ncm2/ncm2-path'
+
+        autocmd BufEnter * call ncm2#enable_for_buffer()
+        set completeopt=noinsert,menuone,noselect
+        " tab to select
+        " and don't hijack my enter key
+        inoremap <expr><Tab> (pumvisible()?(empty(v:completed_item)?"\<C-n>":"\<C-y>"):"\<Tab>")
+        inoremap <expr><CR> (pumvisible()?(empty(v:completed_item)?"\<CR>\<CR>":"\<C-y>"):"\<CR>")
+
     " }}}
 " }}}
 
@@ -701,10 +716,46 @@ call plug#begin('~/.config/nvim/plugged')
         let g:vim_json_syntax_conceal = 0
     " }}}
 
+    " Rust {{{
+        Plug 'rust-lang/rust.vim', { 'for': 'rs' }
+        let g:autofmt_autosave = 1
+
+        " rust
+        " https://github.com/rust-lang/rust.vim/issues/192
+        let g:rustfmt_command = "rustfmt +nightly"
+        let g:rustfmt_autosave = 1
+        let g:rustfmt_emit_files = 1
+        let g:rustfmt_fail_silently = 0
+        let g:rust_clip_command = 'xclip -selection clipboard'
+        let $RUST_SRC_PATH = systemlist("rustc --print sysroot")[0] . "/lib/rustlib/src/rust/src"
+    " }}}
+
     Plug 'fatih/vim-go', { 'for': 'go' }
     Plug 'timcharper/textile.vim', { 'for': 'textile' }
     Plug 'lambdatoast/elm.vim', { 'for': 'elm' }
     Plug 'ekalinin/Dockerfile.vim'
+
+
+	" LSP {{{
+
+	Plug 'autozimu/LanguageClient-neovim', {
+		\ 'branch': 'next',
+		\ 'do': 'bash install.sh',
+		\ }
+
+	let g:LanguageClient_autoStart = 0
+	nnoremap <leader>lcs :LanguageClientStart<CR>
+
+	let g:LanguageClient_serverCommands = {
+		\ 'rust': ['rustup', 'run', 'nightly', 'rls'],
+		\ 'javascript': ['javascript-typescript-stdio'] }
+
+	nnoremap <silent> H :call LanguageClient_textDocument_hover()<CR>
+	nnoremap <silent> Z :call LanguageClient_textDocument_definition()<CR>
+	nnoremap <silent> R :call LanguageClient_textDocument_rename()<CR>
+	nnoremap <silent> S :call LanugageClient_textDocument_documentSymbol()<CR>
+
+	" }}} 
 " }}}
 
 call plug#end()
