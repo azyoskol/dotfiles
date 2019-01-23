@@ -1,9 +1,9 @@
 # gitconfig
 [user]
-    name = Nick Nisi
-    email = nick@nisi.org
+	name = Andrey Zubarev
+	email = andrey@zubarev.net
 [github]
-    user = nicknisi
+	user = azyoskol
 [init]
     templatedir = ~/.dotfiles/git/templates
 [alias]
