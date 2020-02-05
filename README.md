@@ -9,6 +9,7 @@ Obviously this setup works for me, a JavaScript developer on macOS, but this par
 
 + [Initial Setup and Installation](#initial-setup-and-installation)
 + [ZSH Setup](#zsh-setup)
++ [Prompt](#prompt)
 + [Vim and Neovim Setup](#vim-and-neovim-setup)
 + [Fonts](#fonts)
 + [Tmux](#tmux-configuration)
@@ -43,6 +44,15 @@ Then, clone the dotfiles repository to your home directory as `~/.dotfiles`.
 
 Next, the install script will perform a check to see if it is running on an OSX machine. If so, it will install Homebrew if it is not currently installed and will install the homebrew packages listed in [`brew.sh`](install/brew.sh). Then, it will run [`osx.sh`](install/osx.sh) and change some OSX configurations. This file is pretty well documented and so it is advised that you __read through and comment out any changes you do not want__. Next, nginx (installed from Homebrew) will be configured with the provided configuration file. If a `nginx.conf` file already exists in `/usr/local/etc`, a backup will be made at `/usr/local/etc/nginx/nginx.conf.original`.
 
+## Terminal Capabilities
+
+In order to properly support italic fonts in and out of tmux, a couple of terminal capabilities need to be described. Run the following from the root of the project:
+
+```bash
+tic -x resources/xterm-256color-italic.terminfo
+tic -x resources/tmux.terminfo
+```
+
 ## ZSH Setup
 
 ZSH is configured in the `zshrc.symlink` file, which will be symlinked to the home directory. The following occurs in this file:
@@ -58,19 +68,35 @@ ZSH is configured in the `zshrc.symlink` file, which will be symlinked to the ho
 
 ### Prompt
 
-The prompt is meant to be simple while still providing a lot of information to the user, particularly about the status of the git project, if the PWD is a git project. This prompt sets `precmd`, `PROMPT` and `RPROMPT`.
+The prompt is meant to be simple while still providing a lot of information to the user, particularly about the status of the git project, if the PWD is a git project. This prompt sets `precmd`, `PROMPT` and `RPROMPT`. The `precmd` shows the current working directory in it and the `RPROMPT` shows the git and suspended jobs info. The main symbol used on the actual prompt line is `❯`.
 
-The `precmd` shows the current working directory in it and the `RPROMPT` shows the git and suspended jobs info.
+The prompt attempts to speed up certain information lookups by allowing for the prompt itself to be asynchronously rewritten as data comes in. This prevents the prompt from feeling sluggish when, for example, the user is in a large git repo and the git prompt commands take a considerable amount of time.
 
-#### Prompt Git Info
+It does this by writing the actual text that will be displayed int he prompt to a temp file, which is then used to update the prompt information when a signal is trapped.
 
-The git info shown on the `RPROMPT` displays the current branch name, and whether it is clean or dirty.
+#### Git Prompt
 
-Additionally, there are ⇣ and ⇡ arrows that indicate whether a commit has happened and needs to be pushed (⇡), and whether commits have happened on the remote branch that need to be pulled (⇣).
+The git info shown on the `RPROMPT` displays the current branch name, along with the following symbols.
 
-#### Suspended Jobs
+-  `+` - New files were added
+-  `!` - Existing files were modified
+-  `?` - Untracked files exist that are not ignored
+-  `»` - Current changes include file renaming
+-  `✘` - An existing tracked file has been deleted
+-  `$` - There are currently stashed files
+-  `=` - There are unmerged files
+-  `⇡` - Branch is ahead of the remote (indicating a push is needed)
+-  `⇣` - Branch is behind the remote (indicating a pull is needed)
+-  `⇕` - The branches have diverged (indicating history has changed and maybe a force-push is needed)
+-  `✔` - The current working directory is clean
 
-The prompt will also display a ✱ character in the `RPROMPT` indicating that there is a suspended job that exists in the background. This is helpful in keeping track of putting vim in the background by pressing CTRL-Z.
+#### Jobs Prompt
+
+The prompt will also display a `✱` character in the `RPROMPT` indicating that there is a suspended job that exists in the background. This is helpful in keeping track of putting vim in the background by pressing CTRL-Z.
+
+#### Node Prompt
+
+If a `package.json` file or a `node_modules` directory exists in the current working directory, display the node symbol, along with the current version of Node. This is useful information when switching between projects that depend on different versions of Node.
 
 ## Vim and Neovim Setup
 
